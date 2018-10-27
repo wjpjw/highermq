@@ -1,14 +1,16 @@
 #pragma once
+#include "internal.h"
+#include "tbb/atomic.h"
 
 namespace hmq{
-//unique id generator
+// unique id generator
 struct uidgen{
-    tbb::atomic<uint64_t> counter=0;
+    tbb::atomic<uint64_t> counter=1;
     uint64_t next() {
         return counter.fetch_and_add(1);
     }
     void reset(){
-        counter=0;
+        counter=1; // starts from 1;
     }
 };
 

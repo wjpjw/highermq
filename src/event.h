@@ -1,5 +1,7 @@
 #pragma once
 
+#include "internal.h"
+
 namespace hmq{
 
 using eventcb=std::function<void(uint32_t)>;
@@ -11,6 +13,7 @@ public:
 private:
     uint64_t id;
     eventcb cb;
+    uint32_t event_flag;
 };
 
 

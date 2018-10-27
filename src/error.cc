@@ -17,8 +17,3 @@ void hmq::panic(const std::string& err_msg){
     abort();
 }
 
-std::string hmq::error_str(str what, uint16_t level)
-{
-    static std::string errlevels[3]={"I | ", "II | ", "III | "};
-    return errlevels[level] + what + std::string(" | strerror: ")+strerror(errno);
-}

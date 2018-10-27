@@ -1,6 +1,7 @@
 #pragma once
 
-#include "qaio.h"
+#include "internal.h"
+#include <sys/epoll.h>
 
 namespace hmq{
 
@@ -38,40 +39,34 @@ EPOLLET
 EPOLLONESHOT (since Linux 2.6.2)
     Sets the one-shot behavior for the associated file descriptor. This means that after an event is pulled out with epoll_wait(2) the associated file descriptor is internally disabled and no other events will be reported by the epoll interface. The user must call epoll_ctl() with EPOLL_CTL_MOD to rearm the file descriptor with a new event mask.
 
-wjp::epoller uses:
-1. default level-triggered mode: it makes epoll simply a faster poll
-2. EPOLLONESHOT: Since even with edge-triggered epoll, multiple events can be generated upon receipt of multiple chunks of data, the caller has the option to specify the EPOLLONESHOT flag, to tell epoll to disable theassociated file descriptor after the receipt of an event with epoll_wait(2).  When the EPOLLONESHOT flag is specified, it is the caller's responsibility to rearm the file descriptor using epoll_ctl(2) with EPOLL_CTL_MOD. Since we use a set of threads to handle epoll events, one-shot mode is desirable.
-3. EPOLLERR: enables error detection 
-
-Edge-triggered mode: edge-triggered mode delivers events only when changes occur on the monitored file descriptor. 
-
-ET epoll generate more than one event for the same receipt of data, if a buffer overflow happens.
-
-ET mode still seems broken. See:
-    https://stackoverflow.com/questions/12892286/epoll-with-edge-triggered-event/12897334
-
-```
-... the exact behaviour of edge-triggered mode actually depends on the socket type used and isn't really documented anywhere. for datagram sockets you might get more events than you would expect.
-... and for eventfds and timerfds you get fewer than you'd expect.
-```
-
 */
 
 // @indenpendent
 // @threadsafe
 class epoller{
 public:
-    constexpr static int max_nr_epoll_events=32; 
+    constexpr static int max_nr_epoll_events=1024; 
+    constexpr static uint32_t mask=(EPOLLIN|EPOLLOUT|EPOLLERR);
     epoller();
     ~epoller();
     //void* ev_data is stored in event.data.ptr
-    void                    add(int fd, void* ev_data);
-    void                    mod(int fd, int events_new, void* ev_data);
-    void                    mod(int fd, int events_old, int events_append, void* ev_data);
+    void                    add(int fd, uint64_t eventid);
+    void                    mod(int fd, int events_new, uint64_t eventid);
+    void                    mod(int fd, int events_old, int events_append, uint64_t eventid);
     void                    del(int fd);
     int                     wait();
     int                     fd() const noexcept {return epoll_fd_;}
+    uint32_t                event_flag(int index)
+    {
+        return get_event(index).events&mask;
+    }
+    uint64_t                event_id(int index)
+    {
+        return get_event(index).data.u64;
+    }
+protected:
     struct epoll_event*     events(){return events_;}
+    struct epoll_event&     get_event(int index);
 private:
     int                     epoll_fd_;
     struct epoll_event      events_[max_nr_epoll_events];
