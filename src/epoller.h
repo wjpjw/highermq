@@ -56,13 +56,13 @@ public:
     void                    del(int fd);
     int                     wait();
     int                     fd() const noexcept {return epoll_fd_;}
-    uint32_t                event_flag(int index)
+    uint32_t                eflag(int event_index)
     {
-        return get_event(index).events&mask;
+        return get_event(event_index).events&mask;
     }
-    uint64_t                event_id(int index)
+    uint64_t                eid(int event_index)
     {
-        return get_event(index).data.u64;
+        return get_event(event_index).data.u64;
     }
 protected:
     struct epoll_event*     events(){return events_;}

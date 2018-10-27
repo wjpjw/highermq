@@ -3,6 +3,7 @@
 #include "internal.h"
 #include "event.h"
 #include "tbb/concurrent_unordered_map.h"
+#include "uidgen.h"
 
 namespace hmq{
 
@@ -16,7 +17,7 @@ public:
         static eventmap instance_;
         return instance_;
     }
-    std::shared_ptr<event> create_event(int fd, eventcb cb);
+    uint64_t create_event(int fd, eventcb cb);
     std::shared_ptr<event> get_event(uint64_t id);
 
 private:

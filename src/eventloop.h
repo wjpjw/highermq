@@ -3,12 +3,12 @@
 
 namespace hmq{
 
-class reactor{
+class eventloop{
 public:
     // single global instance
-    static reactor&       inst() 
+    static eventloop&       inst() 
     {
-        static reactor instance_;
+        static eventloop instance_;
         return instance_;
     }
     void close()
@@ -16,7 +16,7 @@ public:
         shutdown_=true;
     } 
 private:
-    reactor();
+    eventloop();
     bool shutdown_=false;
     epoller epoller_;
 };
