@@ -21,9 +21,8 @@ configurations of hmq's epoll
 4. nonblocking & cloexec fds:
     set every socket nonblocking upon CTL_ADD
 
-5. the only field set by user in epoll_event is data.u64
-    a uint64_t unique id is used for identifying user-defined events,
-    and is stored in data.u64
+5. use epoll_event.data.fd to get event object 
+    no user defined data field, no implicit coupling      
 
 6. IN, OUT and ERR:
     monitor these three types of events
@@ -42,26 +41,19 @@ epoller::~epoller()
     close(epoll_fd_);
 }
 
-void                    epoller::add(int fd, uint64_t eventid){
+void                    epoller::add(int fd){
     fcntl(fd, F_SETFD, FD_CLOEXEC);
     fcntl(fd, F_SETFL, O_NONBLOCK);
     struct epoll_event ee;
     ee.events=0;
-    ee.data.u64=eventid;
     error_if ((epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, fd, &ee)) != 0, "Fail to add epoll event");
 }
 
-void                    epoller::mod(int fd, int events_new, uint64_t eventid)
+void                    epoller::mod(int fd, int events_new)
 {
     struct epoll_event ee;
     ee.events   = events_new | EPOLLONESHOT | EPOLLERR;
-    ee.data.u64 = eventid; 
     error_if(epoll_ctl(epoll_fd_, EPOLL_CTL_MOD, fd, &ee) != 0, "Fail to mod epoll event"); 
-}
-
-void                    epoller::mod(int fd, int events_old, int events_append, uint64_t eventid)
-{
-    mod(fd, events_old | events_append, eventid);
 }
 
 void                    epoller::del(int fd){

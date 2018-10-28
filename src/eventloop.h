@@ -3,7 +3,7 @@
 
 namespace hmq{
 
-class eventloop{
+class eventloop : public epoller{
 public:
     // single global instance
     static eventloop&       inst() 
@@ -18,7 +18,6 @@ public:
 private:
     eventloop();
     bool shutdown_=false;
-    epoller epoller_;
 };
 
 }

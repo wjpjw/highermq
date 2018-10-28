@@ -17,13 +17,10 @@ public:
         static eventmap instance_;
         return instance_;
     }
-    uint64_t create_event(int fd, eventcb cb);
-    std::shared_ptr<event> get_event(uint64_t id);
-
+    uint64_t create_event(int, eventcb);
+    std::shared_ptr<event> get_event(int);
 private:
-    uidgen gen_;
     tbb::concurrent_unordered_map<uint64_t, std::shared_ptr<event>> map_;
-
 };
 
 }

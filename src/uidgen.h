@@ -3,7 +3,7 @@
 #include "tbb/atomic.h"
 
 namespace hmq{
-// unique id generator
+// atomic counter unique id generator
 struct uidgen{
     tbb::atomic<uint64_t> counter=1;
     uint64_t next() {

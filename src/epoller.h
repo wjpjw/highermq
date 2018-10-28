@@ -50,22 +50,12 @@ public:
     epoller();
     ~epoller();
     //void* ev_data is stored in event.data.ptr
-    void                    add(int fd, uint64_t eventid);
-    void                    mod(int fd, int events_new, uint64_t eventid);
-    void                    mod(int fd, int events_old, int events_append, uint64_t eventid);
+    void                    add(int fd);
+    void                    mod(int fd, int events_new);
     void                    del(int fd);
     int                     wait();
     int                     fd() const noexcept {return epoll_fd_;}
-    uint32_t                eflag(int event_index)
-    {
-        return get_event(event_index).events&mask;
-    }
-    uint64_t                eid(int event_index)
-    {
-        return get_event(event_index).data.u64;
-    }
 protected:
-    struct epoll_event*     events(){return events_;}
     struct epoll_event&     get_event(int index);
 private:
     int                     epoll_fd_;
